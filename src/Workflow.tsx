@@ -20,6 +20,7 @@ export class Workflow extends React.Component<WorkflowComponent.Props, WorkflowC
 
   public static defaultProps: WorkflowComponent.Props = {
     workflowId: null,
+    host: '',
     title: '',
 
     panelRenderer: () => null,
@@ -47,6 +48,7 @@ export class Workflow extends React.Component<WorkflowComponent.Props, WorkflowC
     }
 
     return <Progression
+      host={this.props.host}
       workflowId={this.props.workflowId}
       render={(context : ProgressionContext) => {
         /**

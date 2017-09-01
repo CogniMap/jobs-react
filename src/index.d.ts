@@ -9,6 +9,7 @@ import * as React from 'react';
 export namespace WorkflowComponent
 {
   export interface Props {
+    host: string;
     workflowId: string;
     title: string;
 
@@ -35,11 +36,14 @@ export interface ProgressionContext {
   socket : any;
   workflow ?: WorkflowTreeTasks;
   tasksStatuses ?: Statuses;
+
+  progression: number; // Percent
 }
 
 export namespace ProgressionComponent
 {
   export interface Props {
+    host: string;
     workflowId: string;
 
     render : {(context : ProgressionContext) : any;};

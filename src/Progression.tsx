@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as SocketIO from 'socket.io-client';
 import {update} from './immutability';
+const values = require('object.values');
 
 import {Statuses, WorkflowTreeTasks} from 'jobs';
 import {ProgressionComponent} from './index.d';
@@ -14,6 +15,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
 
   public static defaultProps : ProgressionComponent.Props = {
     workflowId: null,
+    host: '',
     render : (ctx) => null,
     onError : (err) => null,
   }
@@ -49,7 +51,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
     let self = this;
 
     if (this.socket == null) {
-      let socket = this.socket = SocketIO.connect('http://localhost:3030');
+      let socket = this.socket = SocketIO.connect(this.props.host);
       socket.on('hello', data => {
         socket.emit('watchWorkflowInstance', workflowId);
       });
@@ -82,10 +84,19 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
 
   public render()
   {
+    let numTasksDone = 0;
+    let statuses = values(this.state.tasksStatuses);
+    for (let status of statuses) {
+      if (status.status == "ok") {
+        numTasksDone += 1;
+      }
+    }
     let context = {
       socket: this.socket,
       workflow: this.state.workflow,
       tasksStatuses: this.state.tasksStatuses,
+
+      progression: numTasksDone / statuses.length,
     };
     return this.props.render(context);
   }
