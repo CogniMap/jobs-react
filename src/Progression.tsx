@@ -79,7 +79,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
 
             socket.on('setWorkflowStatus', (res : {id : string, status : WorkflowStatus}) => {
                 if (res.id == workflowId) {
-                    switch (status) {
+                    switch (res.status) {
                         case 'done':
                             self.props.onComplete();
                             break;
