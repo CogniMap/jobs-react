@@ -13,8 +13,6 @@ export namespace WorkflowComponent
         host : string;
         workflowId : string;
         title : string;
-
-        panelRenderer();   // Component renderer
     }
 
     export interface State
@@ -27,6 +25,7 @@ export namespace WorkflowComponent
         },
 
         selectedTask ? : string; // Task path
+        updaters ?: any; // Updaters of selected task
     }
 }
 

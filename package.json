@@ -40,7 +40,10 @@
     "classnames": "^2.2.5",
     "immutability": "^1.0.2",
     "jobs": "git+https://github.com/CogniMap/jobs.git",
+    "object.values": "^1.0.4",
     "react": "^15.6.1",
+    "react-json-edit": "^0.3.1",
+    "react-json-view": "^1.13.1",
     "react-treebeard": "^2.0.3",
     "socket.io-client": "^2.0.3"
   },
