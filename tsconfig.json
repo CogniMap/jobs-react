@@ -19,8 +19,8 @@
 			"dom"
 		]
 	},
-  "files": [
-    "src/index.ts"
+  "include": [
+    "src/**/*"
   ],
 	"exclude": [
 		"dist",
