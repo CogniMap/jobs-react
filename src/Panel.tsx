@@ -51,7 +51,7 @@ export class Panel extends React.Component<Panel.Props, Panel.State>
 
     public render()
     {
-        let {body, status, context, argument, contextUpdaters} = this.props.progressContext.tasksStatuses[this.props.taskPath];
+        let {body, status, context, argument, contextUpdaters} = this.props.progressContext.tasksStatuses[this.props.taskPath] as any;
         let socket = this.props.progressContext.socket;
         let self = this;
 
