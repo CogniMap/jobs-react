@@ -37,7 +37,7 @@ export class Workflow extends React.Component<WorkflowComponent.Props, WorkflowC
 
     private getStatusLabel(status : TaskStatus) : string
     {
-        return '[' + status.toUpperCase() + ']';
+        return '[' + (status || "").toUpperCase() + ']';
     }
 
     public render()
