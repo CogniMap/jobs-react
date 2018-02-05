@@ -36,10 +36,14 @@ declare class Workflow extends React.Component<WorkflowComponent.Props, Workflow
 export interface ProgressionContext
 {
     socket : any;
-    workflow ? : WorkflowTreeTasks;
-    tasksStatuses ? : Statuses;
+    workflows: {
+        [id : string] : {
+            workflow ? : WorkflowTreeTasks;
+            tasksStatuses ? : Statuses;
 
-    progression : number; // Percent
+            progression : number; // Percent
+        }
+    }
 }
 
 export namespace ProgressionComponent
@@ -47,7 +51,7 @@ export namespace ProgressionComponent
     export interface Props
     {
         host : string;
-        workflowId : string;
+        workflowIds : string[];
 
         render : {(context : ProgressionContext) : any;};
 
@@ -58,8 +62,12 @@ export namespace ProgressionComponent
 
     export interface State
     {
-        workflow ? : WorkflowTreeTasks;
-        tasksStatuses ? : Statuses;
+        workflows ?: {
+            [id: string]: {
+                workflows: WorkflowTreeTasks; // Descriptions
+                tasksStatuses: Statuses;
+            };
+        };
     }
 }
 

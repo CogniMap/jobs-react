@@ -2,20 +2,24 @@ import * as React from 'react';
 import * as SocketIO from 'socket.io-client';
 import { update } from './immutability';
 
+const mapValues = require('object.map');
+
+const difference = require('lodash/difference');
+
 const values = require('object.values');
 
 import { Statuses, WorkflowStatus, WorkflowTreeTasks } from 'jobs';
 import { ProgressionComponent } from './index.d';
 
 /**
- * Default job progression display.
+ * Backend component to track the progression of one or more workflows.
  */
 export class Progression extends React.Component<ProgressionComponent.Props, ProgressionComponent.State>
 {
     private socket = null;
 
     public static defaultProps : ProgressionComponent.Props = {
-        workflowId: null,
+        workflowIds: [],
         host: '',
         render: (ctx) => null,
         onError: (err) => null,
@@ -25,22 +29,71 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
     {
         super(props);
         this.state = {
-            workflow: [],
-            tasksStatuses: {},
+            workflows: {},
         };
     }
 
     public componentDidMount()
     {
-        if (this.props.workflowId != null) {
-            this.setupWorkflow(this.props.workflowId);
+        if (this.props.workflowIds != null && this.props.workflowIds.length > 0) {
+            this.setupWorkflow(this.props.workflowIds);
         }
     }
 
     public componentWillReceiveProps(nextProps : ProgressionComponent.Props)
     {
-        if (nextProps.workflowId != null && nextProps.workflowId != this.props.workflowId) {
-            this.setupWorkflow(nextProps.workflowId);
+        let newWorkflows = difference(nextProps.workflowIds, this.props.workflowIds);
+        let removedWorkflows = difference(this.props.workflowIds, nextProps.workflowIds);
+
+        this.setupWorkflow(newWorkflows);
+    }
+
+    /**
+     * Called when the description of a workflow updates.
+     *
+     * @param workflowId
+     * @param tasks
+     */
+    private onWorkflowDescription(workflowId, tasks)
+    {
+        if (this.props.workflowIds.indexOf(workflowId) !== -1) {
+            this.setState(prevState => update(prevState, {
+                workflow: {$set: tasks},
+            }));
+        }
+    }
+
+    /**
+     * Called when the statuses of the workflow's task update.
+     *
+     * @param workflowId
+     * @param statuses
+     */
+    private onTasksStatuses(workflowId, statuses)
+    {
+        if (this.props.workflowIds.indexOf(workflowId) != -1) {
+            this.setState(prevState => update(prevState, {
+                tasksStatuses: {
+                    $merge: statuses,
+                },
+            }));
+        }
+    }
+
+    /**
+     * Called when the status of a workflow updates.
+     *
+     * @param workflowId
+     * @param status
+     */
+    private onWorkflowStatus(workflowId, status)
+    {
+        if (this.props.workflowIds.indexOf(workflowId) != -1) {
+            switch (status) {
+                case 'done':
+                    this.props.onComplete();
+                    break;
+            }
         }
     }
 
@@ -49,66 +102,64 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
      *
      * Register the client to the workroom, and update the tasks tree upon workflow description.
      */
-    private setupWorkflow(workflowId : string)
+    private setupWorkflow(workflowIds : string[])
     {
         let self = this;
+
+        function watchWorkflows()
+        {
+            for (let workflowId of workflowIds) {
+                self.socket.emit('watchWorkflowInstance', workflowId);
+            }
+        }
 
         if (this.socket == null) {
             let socket = this.socket = SocketIO.connect(this.props.host);
             socket.on('hello', data => {
-                socket.emit('watchWorkflowInstance', workflowId);
+                watchWorkflows();
             });
 
             socket.on('workflowDescription', (res : {id : string, tasks : WorkflowTreeTasks}) => {
-                if (res.id == workflowId) {
-                    self.setState(prevState => update(prevState, {
-                        workflow: {$set: res.tasks},
-                    }));
-                }
+                self.onWorkflowDescription(res.id, res.tasks);
             });
 
             socket.on('setTasksStatuses', (res : {id : string, statuses : Statuses}) => {
-                if (res.id == workflowId) {
-                    self.setState(prevState => update(prevState, {
-                        tasksStatuses: {
-                            $merge: res.statuses,
-                        },
-                    }));
-                }
+                self.onTasksStatuses(res.id, res.statuses);
             });
 
             socket.on('setWorkflowStatus', (res : {id : string, status : WorkflowStatus}) => {
-                if (res.id == workflowId) {
-                    switch (res.status) {
-                        case 'done':
-                            self.props.onComplete();
-                            break;
-                    }
-                }
+                self.onWorkflowStatus(res.id, res.status);
             });
 
             socket.on('executionError', this.props.onError);
         } else {
-            this.socket.emit('watchWorkflowInstance', workflowId);
+            watchWorkflows();
         }
     }
 
-
     public render()
     {
-        let numTasksDone = 0;
-        let statuses = values(this.state.tasksStatuses);
-        for (let status of statuses) {
-            if (status.status == 'ok') {
-                numTasksDone += 1;
+        function getProgression(tasksStatuses)
+        {
+            let numTasksDone = 0;
+            let statuses = values(tasksStatuses);
+            for (let status of statuses) {
+                if (status.status == 'ok') {
+                    numTasksDone += 1;
+                }
             }
+            return numTasksDone / statuses.length;
         }
+
+
         let context = {
             socket: this.socket,
-            workflow: this.state.workflow,
-            tasksStatuses: this.state.tasksStatuses,
-
-            progression: numTasksDone / statuses.length,
+            workflows: mapValues(this.state.workflows, (key, value, obj) => {
+                return {
+                    ... value,
+                    progression: getProgression(value.tasksStatuses),
+                };
+            }),
         };
         return this.props.render(context);
     }

@@ -5,6 +5,7 @@ const equals = require('deep-equal');
 
 import { ProgressionContext } from './index.d';
 import { Packets } from './network';
+import { networkInterfaces } from 'os';
 
 namespace Panel
 {
@@ -12,7 +13,7 @@ namespace Panel
     {
         taskPath : string;
         workflowId: string;
-        progressContext: ProgressionContext;
+        progressContext: ProgressionContext; // We assume there is our workflow in this context
     }
 
     export interface State
@@ -51,7 +52,12 @@ export class Panel extends React.Component<Panel.Props, Panel.State>
 
     public render()
     {
-        let {body, status, context, argument, contextUpdaters} = this.props.progressContext.tasksStatuses[this.props.taskPath] as any;
+        let workflowContext = this.props.progressContext[this.props.workflowId];
+        if (workflowContext== null) {
+            throw new Error("Missing workflow in progression context");
+        }
+
+        let {body, status, context, argument, contextUpdaters} = workflowContext.tasksStatuses[this.props.taskPath] as any;
         let socket = this.props.progressContext.socket;
         let self = this;
 

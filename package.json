@@ -40,6 +40,8 @@
     "classnames": "^2.2.5",
     "immutability": "^1.0.2",
     "jobs": "git+https://github.com/CogniMap/jobs.git",
+    "lodash": "^4.17.5",
+    "object.map": "^1.0.1",
     "object.values": "^1.0.4",
     "react": "^15.6.1",
     "react-json-edit": "^0.3.1",

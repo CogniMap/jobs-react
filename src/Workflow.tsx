@@ -49,15 +49,20 @@ export class Workflow extends React.Component<WorkflowComponent.Props, WorkflowC
 
         return <Progression
             host={this.props.host}
-            workflowId={this.props.workflowId}
+            workflowIds={[this.props.workflowId]}
             render={(progressContext : ProgressionContext) => {
+                let workflowContext = progressContext[self.props.workflowId];
+                if (workflowContext == null) {
+                    throw new Error("Missing workflow in progression context");
+                }
+
                 /**
                  * Append the toggled/active state and the status to tasks,
                  */
                 function renderableWorkflow(tasks : WorkflowTreeTasks)
                 {
                     return (tasks as any).map(task => {
-                        let status = progressContext.tasksStatuses[task.path] || {
+                        let status = workflowContext.tasksStatuses[task.path] || {
                             status: 'inactive',
                         };
                         let nodeState = self.state.tasksStates[task.path] || {
@@ -76,7 +81,7 @@ export class Workflow extends React.Component<WorkflowComponent.Props, WorkflowC
                         <div className="row">
                             <div className="col-md-6 col-sm-12">
                                 <Treebeard
-                                    data={renderableWorkflow(progressContext.workflow)}
+                                    data={renderableWorkflow(workflowContext.workflow)}
                                     onToggle={(node, toggled) => {
                                         let updater = {
                                             tasksStates: {
