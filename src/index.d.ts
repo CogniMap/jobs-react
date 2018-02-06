@@ -57,7 +57,7 @@ export namespace ProgressionComponent
 
         // Events handlers
         onError ? : {(err : {type : string, payload : string});};
-        onComplete ?: {(): void;};
+        onComplete ?: {(workflowId : string): void;};
     }
 
     export interface State

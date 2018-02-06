@@ -23,7 +23,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
         host: '',
         render: (ctx) => null,
         onError: (err) => null,
-        onComplete: () => null,
+        onComplete: (workflowId) => null,
     };
 
     public constructor(props)
@@ -101,7 +101,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
         if (this.props.workflowIds.indexOf(workflowId) != -1) {
             switch (status) {
                 case 'done':
-                    this.props.onComplete();
+                    this.props.onComplete(workflowId);
                     break;
             }
         }
