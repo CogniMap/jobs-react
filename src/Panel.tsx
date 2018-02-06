@@ -54,7 +54,7 @@ export class Panel extends React.Component<Panel.Props, Panel.State>
     {
         let workflowContext = this.props.progressContext[this.props.workflowId];
         if (workflowContext== null) {
-            throw new Error("Missing workflow in progression context");
+            return <div></div>;
         }
 
         let {body, status, context, argument, contextUpdaters} = workflowContext.tasksStatuses[this.props.taskPath] as any;

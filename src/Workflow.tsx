@@ -51,9 +51,10 @@ export class Workflow extends React.Component<WorkflowComponent.Props, WorkflowC
             host={this.props.host}
             workflowIds={[this.props.workflowId]}
             render={(progressContext : ProgressionContext) => {
-                let workflowContext = progressContext[self.props.workflowId];
+                let workflowContext = progressContext.workflows[self.props.workflowId];
                 if (workflowContext == null) {
-                    throw new Error("Missing workflow in progression context");
+                    console.log("Missing workflow context (in <Workflow>)");
+                    return null;
                 }
 
                 /**

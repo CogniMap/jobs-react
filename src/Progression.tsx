@@ -23,6 +23,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
         host: '',
         render: (ctx) => null,
         onError: (err) => null,
+        onComplete: () => null,
     };
 
     public constructor(props)
@@ -36,6 +37,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
     public componentDidMount()
     {
         if (this.props.workflowIds != null && this.props.workflowIds.length > 0) {
+            console.log(this.props.workflowIds);
             this.setupWorkflow(this.props.workflowIds);
         }
     }
@@ -58,7 +60,11 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
     {
         if (this.props.workflowIds.indexOf(workflowId) !== -1) {
             this.setState(prevState => update(prevState, {
-                workflow: {$set: tasks},
+                workflows: {
+                    [workflowId]: {
+                        workflow: {$set: tasks},
+                    }
+                }
             }));
         }
     }
@@ -73,9 +79,13 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
     {
         if (this.props.workflowIds.indexOf(workflowId) != -1) {
             this.setState(prevState => update(prevState, {
-                tasksStatuses: {
-                    $merge: statuses,
-                },
+                workflows: {
+                    [workflowId]: {
+                        tasksStatuses: {
+                            $merge: statuses,
+                        },
+                    }
+                }
             }));
         }
     }
@@ -105,6 +115,16 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
     private setupWorkflow(workflowIds : string[])
     {
         let self = this;
+        let stateWorkflows = {};
+        for (let workflowId of workflowIds) {
+            stateWorkflows[workflowId] = {
+                workflow: [], // WorkflowTreeTask
+                tasksStatuses: {}
+            };
+        }
+        this.setState(state => update(state, {workflows: {
+            $merge: stateWorkflows
+        }}));
 
         function watchWorkflows()
         {
@@ -154,13 +174,15 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
 
         let context = {
             socket: this.socket,
-            workflows: mapValues(this.state.workflows, (key, value, obj) => {
+            workflows: mapValues(this.state.workflows, (value, key, obj) => {
                 return {
                     ... value,
                     progression: getProgression(value.tasksStatuses),
                 };
             }),
         };
-        return this.props.render(context);
+        return <div>
+            {this.props.render(context)}
+        </div>;
     }
 }
