@@ -1,0 +1,1 @@
+Test the repository as an NPM dependency.
