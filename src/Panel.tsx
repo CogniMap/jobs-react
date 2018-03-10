@@ -42,19 +42,22 @@ export class Panel extends React.Component<Panel.Props, Panel.State>
         }
     }
 
-    public componentWillReceiveProps(nextProps)
+    public componentWillReceiveProps(nextProps : Panel.Props)
     {
-        let contextUpdaters = nextProps.progressContext.tasksStatuses[nextProps.taskPath].contextUpdaters;
-        if (!equals(contextUpdaters, this.state.contextUpdaters)) {
-            this.setState({contextUpdaters});
+        let workflowContext = nextProps.progressContext.workflows[nextProps.workflowId];
+        if (workflowContext != null) {
+            //let contextUpdaters = workflowContext.tasksStatuses[nextProps.taskPath].contextUpdaters;
+            //if (!equals(contextUpdaters, this.state.contextUpdaters)) {
+            //    this.setState({contextUpdaters});
+            //}
         }
     }
 
     public render()
     {
-        let workflowContext = this.props.progressContext[this.props.workflowId];
+        let workflowContext = this.props.progressContext.workflows[this.props.workflowId];
         if (workflowContext== null) {
-            return <div></div>;
+            return <div/>;
         }
 
         let {body, status, context, argument, contextUpdaters} = workflowContext.tasksStatuses[this.props.taskPath] as any;
@@ -68,7 +71,11 @@ export class Panel extends React.Component<Panel.Props, Panel.State>
         }
 
         if (typeof body == 'string') {
-            body = {error: body};
+            if (status == "ok") {
+                body = {"result": body}
+            } else {
+                body = {"error": body};
+            }
         }
 
         return (

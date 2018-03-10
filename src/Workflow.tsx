@@ -102,12 +102,11 @@ export class Workflow extends React.Component<WorkflowComponent.Props, WorkflowC
                                             }
                                         }
                                         updater['selectedTask'] = {$set: node.path};
-
-                                        self.setState(update(self.state, updater));
+                                        self.setState(state => update(state, updater));
                                     }}
                                 />
                             </div>
-                            {this.state.selectedTask == null ? null : (
+                            {self.state.selectedTask == null ? null : (
                                 <Panel
                                     workflowId={self.props.workflowId}
                                     taskPath={self.state.selectedTask}

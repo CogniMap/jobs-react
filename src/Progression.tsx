@@ -37,7 +37,6 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
     public componentDidMount()
     {
         if (this.props.workflowIds != null && this.props.workflowIds.length > 0) {
-            console.log(this.props.workflowIds);
             this.setupWorkflow(this.props.workflowIds);
         }
     }
