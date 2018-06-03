@@ -20,7 +20,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
 
     public static defaultProps : ProgressionComponent.Props = {
         workflowIds: [],
-        host: '',
+        host: null,
         render: (ctx) => null,
         onError: (err) => null,
         onComplete: (workflowId) => null,
@@ -133,7 +133,12 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
         }
 
         if (this.socket == null) {
-            let socket = this.socket = SocketIO.connect(this.props.host);
+            let socket = null;
+            if (this.props.host != null) {
+                this.socket = SocketIO.connect(this.props.host);
+            } else {
+                this.socket = SocketIO.connect();
+            }
             socket.on('hello', data => {
                 watchWorkflows();
             });
