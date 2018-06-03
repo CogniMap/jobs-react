@@ -133,29 +133,28 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
         }
 
         if (this.socket == null) {
-            let socket = null;
             if (this.props.host != null) {
                 this.socket = SocketIO.connect(this.props.host);
             } else {
                 this.socket = SocketIO.connect();
             }
-            socket.on('hello', data => {
+            this.socket.on('hello', data => {
                 watchWorkflows();
             });
 
-            socket.on('workflowDescription', (res : {id : string, tasks : WorkflowTreeTasks}) => {
+            this.socket.on('workflowDescription', (res : {id : string, tasks : WorkflowTreeTasks}) => {
                 self.onWorkflowDescription(res.id, res.tasks);
             });
 
-            socket.on('setTasksStatuses', (res : {id : string, statuses : Statuses}) => {
+            this.socket.on('setTasksStatuses', (res : {id : string, statuses : Statuses}) => {
                 self.onTasksStatuses(res.id, res.statuses);
             });
 
-            socket.on('setWorkflowStatus', (res : {id : string, status : WorkflowStatus}) => {
+            this.socket.on('setWorkflowStatus', (res : {id : string, status : WorkflowStatus}) => {
                 self.onWorkflowStatus(res.id, res.status);
             });
 
-            socket.on('executionError', this.props.onError);
+            this.socket.on('executionError', this.props.onError);
         } else {
             watchWorkflows();
         }
