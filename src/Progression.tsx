@@ -133,12 +133,16 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
         }
 
         if (this.socket == null) {
+            const options = {
+                transports: ['polling']
+            };
             if (this.props.host != null) {
-                this.socket = SocketIO.connect(this.props.host);
+                this.socket = SocketIO.connect(this.props.host, options);
             } else {
-                this.socket = SocketIO.connect();
+                this.socket = SocketIO.connect(options);
             }
-            this.socket.on('hello', data => {
+            let socket = this.socket;
+            socket.on('hello', data => {
                 watchWorkflows();
             });
 

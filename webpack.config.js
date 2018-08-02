@@ -6,6 +6,7 @@ module.exports = {
         path: __dirname + "/tests/",
         filename: './bundle.js',
     },
+    devtool: "source-map",
     mode: 'development',
     resolve: {
         extensions: ['.tsx', '.ts', '.js', '.d.ts']
