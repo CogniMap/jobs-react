@@ -50,6 +50,8 @@ export namespace ProgressionComponent
 {
     export interface Props
     {
+        style ?: any;
+        
         host ?: string;
         workflowIds : string[];
 

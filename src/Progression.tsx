@@ -188,7 +188,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
                 };
             }),
         };
-        return <div>
+        return <div style={this.props.style}>
             {this.props.render(context)}
         </div>;
     }
