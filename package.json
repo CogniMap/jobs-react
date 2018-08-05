@@ -35,7 +35,7 @@
     "classnames": "^2.2.5",
     "fake-progress": "^1.0.3",
     "immutability": "^1.0.2",
-    "jobs": "^1.0.1",
+    "jobs": "^1.0.7",
     "lodash": "^4.17.5",
     "object.map": "^1.0.1",
     "object.values": "^1.0.4",

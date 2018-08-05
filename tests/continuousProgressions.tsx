@@ -81,6 +81,12 @@ export class ContinuousProgressions extends React.Component<ContinuousProgressio
         return (
             <div>
                 <ContinuousProgression
+                    onError={() => {
+                        console.log('onError()');
+                    }}
+                    onComplete={() => {
+                        console.log('onComplete()');
+                    }}
                     host="http://localhost:4005"
                     workflowIds={this.props.workflowIds}
                     estimations={{
