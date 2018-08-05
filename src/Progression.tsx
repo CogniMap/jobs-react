@@ -1,24 +1,20 @@
 import * as React from 'react';
 import * as SocketIO from 'socket.io-client';
-import { update } from './immutability';
-
+import {update} from './immutability';
 const mapValues = require('object.map');
-
 const difference = require('lodash/difference');
-
 const values = require('object.values');
 
-import { Statuses, WorkflowStatus, WorkflowTreeTasks } from 'jobs';
-import { ProgressionComponent } from './index.d';
+import {TaskStatus, Statuses, WorkflowStatus, WorkflowTreeTasks} from 'jobs';
+import {ProgressionComponent} from './index.d';
 
 /**
  * Backend component to track the progression of one or more workflows.
  */
-export class Progression extends React.Component<ProgressionComponent.Props, ProgressionComponent.State>
-{
+export class Progression extends React.Component<ProgressionComponent.Props, ProgressionComponent.State> {
     private socket = null;
 
-    public static defaultProps : ProgressionComponent.Props = {
+    public static defaultProps: ProgressionComponent.Props = {
         workflowIds: [],
         host: null,
         render: (ctx) => null,
@@ -26,23 +22,20 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
         onComplete: (workflowId) => null,
     };
 
-    public constructor(props)
-    {
+    public constructor(props) {
         super(props);
         this.state = {
             workflows: {},
         };
     }
 
-    public componentDidMount()
-    {
+    public componentDidMount() {
         if (this.props.workflowIds != null && this.props.workflowIds.length > 0) {
             this.setupWorkflow(this.props.workflowIds);
         }
     }
 
-    public componentWillReceiveProps(nextProps : ProgressionComponent.Props)
-    {
+    public componentWillReceiveProps(nextProps: ProgressionComponent.Props) {
         let newWorkflows = difference(nextProps.workflowIds, this.props.workflowIds);
         let removedWorkflows = difference(this.props.workflowIds, nextProps.workflowIds);
 
@@ -55,8 +48,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
      * @param workflowId
      * @param tasks
      */
-    private onWorkflowDescription(workflowId, tasks)
-    {
+    private onWorkflowDescription(workflowId, tasks) {
         if (this.props.workflowIds.indexOf(workflowId) !== -1) {
             this.setState(prevState => update(prevState, {
                 workflows: {
@@ -74,8 +66,28 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
      * @param workflowId
      * @param statuses
      */
-    private onTasksStatuses(workflowId, statuses)
-    {
+    private onTasksStatuses(workflowId, statuses) {
+        let prevStatuses = this.state.workflows[workflowId].tasksStatuses;
+
+        // Detect changes to trigger onTaskStart / onTaskEnd
+        if (prevStatuses) {
+            for (let taskPath in statuses) {
+                let prevTaskStatus = prevStatuses[taskPath] && prevStatuses[taskPath].status as TaskStatus;
+                let nextTaskStatus = statuses[taskPath].status as TaskStatus;
+                if (prevTaskStatus != nextTaskStatus) {
+                    if (nextTaskStatus == 'queued') {
+                        if (this.props.onTaskStart) {
+                            this.props.onTaskStart(workflowId, taskPath);
+                        }
+                    } else if (nextTaskStatus == 'ok' || nextTaskStatus == 'failed') {
+                        if (this.props.onTaskEnd) {
+                            this.props.onTaskEnd(workflowId, taskPath);
+                        }
+                    }
+                }
+            }
+        }
+
         if (this.props.workflowIds.indexOf(workflowId) != -1) {
             this.setState(prevState => update(prevState, {
                 workflows: {
@@ -95,8 +107,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
      * @param workflowId
      * @param status
      */
-    private onWorkflowStatus(workflowId, status)
-    {
+    private onWorkflowStatus(workflowId, status) {
         if (this.props.workflowIds.indexOf(workflowId) != -1) {
             switch (status) {
                 case 'done':
@@ -111,8 +122,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
      *
      * Register the client to the workroom, and update the tasks tree upon workflow description.
      */
-    private setupWorkflow(workflowIds : string[])
-    {
+    private setupWorkflow(workflowIds: string[]) {
         let self = this;
         let stateWorkflows = {};
         for (let workflowId of workflowIds) {
@@ -121,12 +131,13 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
                 tasksStatuses: {}
             };
         }
-        this.setState(state => update(state, {workflows: {
-            $merge: stateWorkflows
-        }}));
+        this.setState(state => update(state, {
+            workflows: {
+                $merge: stateWorkflows
+            }
+        }));
 
-        function watchWorkflows()
-        {
+        function watchWorkflows() {
             for (let workflowId of workflowIds) {
                 self.socket.emit('watchWorkflowInstance', workflowId);
             }
@@ -146,15 +157,15 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
                 watchWorkflows();
             });
 
-            this.socket.on('workflowDescription', (res : {id : string, tasks : WorkflowTreeTasks}) => {
+            this.socket.on('workflowDescription', (res: { id: string, tasks: WorkflowTreeTasks }) => {
                 self.onWorkflowDescription(res.id, res.tasks);
             });
 
-            this.socket.on('setTasksStatuses', (res : {id : string, statuses : Statuses}) => {
+            this.socket.on('setTasksStatuses', (res: { id: string, statuses: Statuses }) => {
                 self.onTasksStatuses(res.id, res.statuses);
             });
 
-            this.socket.on('setWorkflowStatus', (res : {id : string, status : WorkflowStatus}) => {
+            this.socket.on('setWorkflowStatus', (res: { id: string, status: WorkflowStatus }) => {
                 self.onWorkflowStatus(res.id, res.status);
             });
 
@@ -164,10 +175,8 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
         }
     }
 
-    public render()
-    {
-        function getProgression(tasksStatuses)
-        {
+    public render() {
+        function getProgression(tasksStatuses) {
             let numTasksDone = 0;
             let statuses = values(tasksStatuses);
             for (let status of statuses) {
@@ -183,7 +192,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
             socket: this.socket,
             workflows: mapValues(this.state.workflows, (value, key, obj) => {
                 return {
-                    ... value,
+                    ...value,
                     progression: getProgression(value.tasksStatuses),
                 };
             }),

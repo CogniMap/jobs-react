@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom';
 
 import {Workflow} from '../src/Workflow';
 import {Progressions} from './progressions';
+import {ContinuousProgressions} from "./continuousProgressions";
 
 require('../assets/style.scss');
 
@@ -58,6 +59,9 @@ ReactDOM.render(
                     title="Test"
                 />
             )}
+
+            <h1>Fake progression</h1>
+            <ContinuousProgressions workflowIds={[workflowId]}/>
 
             <h1>Progression multi ephemeral workflows</h1>
             <button onClick={() => {
