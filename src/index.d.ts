@@ -104,8 +104,10 @@ export namespace ContinuousProgressionComponent {
     }
 }
 
-
 declare class Progression extends React.Component<ProgressionComponent.Props, ProgressionComponent.State> {
+}
+
+declare class ContinuousProgression extends React.Component<ContinuousProgressionComponent.Props, ContinuousProgressionComponent.State> {
 }
 
 /***************************************************************************
