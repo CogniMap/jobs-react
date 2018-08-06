@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Line, Circle} from 'rc-progress';
+
 require('rc-progress/dist/rc-progress.css');
 
 const values = require('object.values');
@@ -15,7 +16,7 @@ namespace ContinuousProgressions {
     }
 
     export interface State {
-
+        show: boolean;
     }
 }
 
@@ -30,6 +31,13 @@ namespace ContinuousProgressions {
  * - task 5
  */
 export class ContinuousProgressions extends React.Component<ContinuousProgressions.Props, ContinuousProgressions.State> {
+    public constructor(props) {
+        super(props);
+        this.state = {
+            show: true
+        };
+    }
+
     public getStatusColor(status: TaskStatus) {
         if (status == "ok") {
             return 'green';
@@ -78,46 +86,66 @@ export class ContinuousProgressions extends React.Component<ContinuousProgressio
     }
 
     public render() {
+        let self = this;
         return (
             <div>
-                <ContinuousProgression
-                    onError={() => {
-                        console.log('onError()');
-                    }}
-                    onComplete={() => {
-                        console.log('onComplete()');
-                    }}
-                    host="http://localhost:4005"
-                    workflowIds={this.props.workflowIds}
-                    estimations={{
-                        '#.task1': 50,
-                        '#.task2': 50,
-                        '#.task3': 300000,
-                        '#.task4': 50,
-                        '#.task5': 50,
-                        '#.task6': 50,
-                    }}
-                    render={context => {
-                        let workflowIds = Object.keys(context.workflows);
+                <button onClick={() => {
+                    self.setState({
+                        show: false,
+                    }, () => {
+                        setTimeout(() => {
+                            self.setState({show: true});
+                        }, 1000);
+                    })
+                }}>
+                    Recharger le composant
+                </button>
+                {this.state.show ? (
+                    <ContinuousProgression
+                        onError={() => {
+                            console.log('onError()');
+                        }}
+                        onComplete={() => {
+                            console.log('onComplete()');
+                        }}
+                        onTaskStart={(workflowId, taskPath) => {
+                            console.log('Start task : ' + taskPath + ' (of workflow ' + workflowId);
+                        }}
+                        onTaskEnd={(workflowId, taskPath) => {
+                            console.log('End task : ' + taskPath + ' (of workflow ' + workflowId);
+                        }}
+                        host="http://localhost:4005"
+                        workflowIds={this.props.workflowIds}
+                        estimations={{
+                            '#.task1': 7000,
+                            '#.task2': 7000,
+                            '#.task3': 20000,
+                            '#.task4': 5000,
+                            '#.task5': 50,
+                            '#.task6': 50,
+                        }}
+                        render={context => {
+                            let workflowIds = Object.keys(context.workflows);
 
-                        return (
-                            <React.Fragment>
-                                {workflowIds.map((workflowId, i) => {
-                                    let workflow = context.workflows[workflowId];
-                                    if (workflow == null) {
-                                        return null;
-                                    }
-                                    return (<div key={i}>
-                                            <h3>Workflow {workflowId}</h3>
-                                            {this.renderWorkflow(workflowId, context)}
-                                        </div>
-                                    );
-                                })}
+                            return (
+                                <React.Fragment>
+                                    {workflowIds.map((workflowId, i) => {
+                                        let workflow = context.workflows[workflowId];
+                                        if (workflow == null) {
+                                            return null;
+                                        }
+                                        return (<div key={i}>
+                                                <h3>Workflow {workflowId}</h3>
+                                                {this.renderWorkflow(workflowId, context)}
+                                            </div>
+                                        );
+                                    })}
 
-                            </React.Fragment>
-                        );
-                    }}
-                />
+                                </React.Fragment>
+                            );
+                        }}
+                    />
+                ) : null}
             </div>
         );
     }

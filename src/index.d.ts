@@ -50,14 +50,14 @@ interface BaseProgressionProps {
     // Events handlers
     onError?: { (err: { type: string, payload: string }); };
     onComplete?: { (workflowId: string): void; };
+
+    onTaskStart?: { (workflowId: string, taskPath: string) };
+    onTaskEnd?: { (workflowId: string, taskPath: string) };
 }
 
 export namespace ProgressionComponent {
     export interface Props extends BaseProgressionProps {
         render: { (context: ProgressionContext): any; };
-
-        onTaskStart?: { (workflowId: string, taskPath: string) };
-        onTaskEnd?: { (workflowId: string, taskPath: string) };
     }
 
     export interface State {

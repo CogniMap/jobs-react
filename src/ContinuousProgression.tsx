@@ -83,6 +83,10 @@ export class ContinuousProgression extends React.Component<ContinuousProgression
             <Progression
                 {... this.props as any}
                 onTaskStart={(workflowId, taskPath) => {
+                    if (self.props.onTaskStart) {
+                        self.props.onTaskStart(workflowId, taskPath);
+                    }
+
                     let estimation = self.props.estimations[taskPath]; // In milliseconds
                     /**
                      * With a timeconstant of 10 sec, after 10 seconds, progress will be 0.6321 ( = 1-Math.exp(-1) )
@@ -101,6 +105,10 @@ export class ContinuousProgression extends React.Component<ContinuousProgression
                     self.intervals[workflowId][taskPath] = handler;
                 }}
                 onTaskEnd={(workflowId, taskPath) => {
+                    if (self.props.onTaskEnd) {
+                        self.props.onTaskEnd(workflowId, taskPath);
+                    }
+
                     // End fakeProgress
                     let fakeProgress = this.fakeProgress[workflowId][taskPath];
                     if (fakeProgress != null) { // onTaskStart may have not been called for quick tasks
