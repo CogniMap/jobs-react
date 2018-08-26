@@ -13,6 +13,7 @@ import {ProgressionComponent} from './index.d';
  */
 export class Progression extends React.Component<ProgressionComponent.Props, ProgressionComponent.State> {
     private socket = null;
+    private _mounted;
 
     public static defaultProps: ProgressionComponent.Props = {
         workflowIds: [],
@@ -30,8 +31,19 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
     }
 
     public componentDidMount() {
+        this._mounted = true;
         if (this.props.workflowIds != null && this.props.workflowIds.length > 0) {
             this.setupWorkflow(this.props.workflowIds);
+        }
+    }
+
+    public componentWillUnmount() {
+        this._mounted = false;
+    }
+
+    public asyncSetState(... args) {
+        if (this._mounted) {
+            (this.setState as any).setState(... args);
         }
     }
 
@@ -50,7 +62,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
      */
     private onWorkflowDescription(workflowId, tasks) {
         if (this.props.workflowIds.indexOf(workflowId) !== -1) {
-            this.setState(prevState => update(prevState, {
+            this.asyncSetState(prevState => update(prevState, {
                 workflows: {
                     [workflowId]: {
                         workflow: {$set: tasks},
@@ -89,7 +101,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
         }
 
         if (this.props.workflowIds.indexOf(workflowId) != -1) {
-            this.setState(prevState => update(prevState, {
+            this.asyncSetState(prevState => update(prevState, {
                 workflows: {
                     [workflowId]: {
                         tasksStatuses: {
@@ -131,7 +143,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
                 tasksStatuses: {}
             };
         }
-        this.setState(state => update(state, {
+        this.asyncSetState(state => update(state, {
             workflows: {
                 $merge: stateWorkflows
             }
