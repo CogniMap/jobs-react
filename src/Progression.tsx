@@ -43,7 +43,7 @@ export class Progression extends React.Component<ProgressionComponent.Props, Pro
 
     public asyncSetState(... args) {
         if (this._mounted) {
-            (this.setState as any).setState(... args);
+            (this.setState as any)(... args);
         }
     }
 
